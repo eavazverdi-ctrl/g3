@@ -229,3 +229,37 @@ document.getElementById('sellHead')?.addEventListener('click', ()=>{
     });
   }
 })();
+
+// ===== v53: BG FAB picker (icon button, native tap on hidden input) =====
+(function(){
+  const BG_KEY='fxl_custom_bg';
+  const wall = document.querySelector('.bg-wall');
+  function applyBG(dataUrl){
+    if (!wall) return;
+    wall.style.backgroundImage = dataUrl?`url(${dataUrl})`:'';
+    try{ dataUrl?localStorage.setItem(BG_KEY,dataUrl):localStorage.removeItem(BG_KEY);}catch{}
+  }
+  try{ const saved = localStorage.getItem(BG_KEY); if(saved) applyBG(saved); }catch{}
+
+  const pick = document.getElementById('bgFabFile');
+  if (pick){
+    pick.addEventListener('change', ()=>{
+      const f = pick.files && pick.files[0];
+      if(!f) return;
+      const fr = new FileReader();
+      fr.onload = ()=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const max=1920, r=Math.min(1, max/Math.max(img.width, img.height));
+          const w=Math.max(1, Math.round(img.width*r)), h=Math.max(1, Math.round(img.height*r));
+          const c=document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          applyBG(c.toDataURL('image/jpeg',0.9));
+          pick.value='';
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(f);
+    }, { passive:true });
+  }
+})();
