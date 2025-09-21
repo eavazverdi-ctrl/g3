@@ -120,5 +120,10 @@
       window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
     }
   </script>
+
+  <!-- Quick background changer (visible at bottom) -->
+  <button class="bg-quick-btn send-btn" id="quickBGBtn" aria-label="تغییر زمینه">تغییر زمینه</button>
+  <input type="file" id="bgQuickFile" accept="image/*" style="display:none">
+
 </body>
 </html>

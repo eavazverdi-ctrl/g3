@@ -191,3 +191,41 @@ document.getElementById('sellHead')?.addEventListener('click', ()=>{
     catch(e){ window.open('https://t.me/share/url?text='+encodeURIComponent(text),'_blank'); closeSend(); }
   });
 })();
+
+// ===== v52: Quick background changer (ensure mounted) =====
+(function(){
+  const BG_KEY='fxl_custom_bg';
+  const wall = document.querySelector('.bg-wall');
+  function applyBG(dataUrl){
+    if (!wall) return;
+    wall.style.backgroundImage = dataUrl?`url(${dataUrl})`:'';
+    try{ dataUrl?localStorage.setItem(BG_KEY,dataUrl):localStorage.removeItem(BG_KEY); }catch{}
+  }
+  try{ const saved = localStorage.getItem(BG_KEY); if(saved) applyBG(saved); }catch{}
+
+  const btn = document.getElementById('quickBGBtn');
+  const file = document.getElementById('bgQuickFile');
+  if(btn && file){
+    btn.addEventListener('click', ()=> file.click(), { passive:true });
+    file.addEventListener('change', ()=>{
+      const f = file.files && file.files[0];
+      if(!f) return;
+      const fr = new FileReader();
+      fr.onload = ()=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const max=1920;
+          const r = Math.min(1, max/Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width*r));
+          const h = Math.max(1, Math.round(img.height*r));
+          const c = document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          applyBG(c.toDataURL('image/jpeg',0.9));
+          file.value='';
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(f);
+    });
+  }
+})();
